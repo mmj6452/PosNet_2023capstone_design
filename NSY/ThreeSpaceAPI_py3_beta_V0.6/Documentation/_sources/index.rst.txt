@@ -1,0 +1,23 @@
+.. ThreeSpaceAPI documentation master file, created by
+   sphinx-quickstart on Mon Feb 28 14:11:11 2022.
+
+
+ThreeSpaceAPI Documentation
+=========================================
+For more information on sensor commands please refer to our user manual: https://yostlabs.com/wp/wp-content/uploads/pdf/3-Space-Sensor-Users-Manual-3.pdf
+	
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+.. automodule:: ThreeSpaceAPI
+	:members:
+	:undoc-members:
+
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`search`
