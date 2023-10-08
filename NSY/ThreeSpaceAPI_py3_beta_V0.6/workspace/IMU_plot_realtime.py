@@ -3,6 +3,10 @@ IMU데이터를 실시간으로 그래프로 표현하는 코드
 Plot속도의 문제로 빠른 속도로 데이터를 읽어오는것은 불가능
 테스팅 용도의 코드
 PC USB포트에 IMU를 연결하고 COM port를 지정해주면 실행
+Data format: "%float(OrientPitch),%float(OrientYaw),%float(OrientRoll),
+              %float(CorrectedGyroX),%float(CorrectedGyroY),%float(CorrectedGyroZ),
+              %float(CorrectedAccelX),%float(CorrectedAccelY),%float(CorrectedAccelZ),
+              %float(CorrectedMagX),%float(CorrectedMagY),%float(CorrectedMagZ)
 """
 
 from exampleComClasses import USB_ExampleClass
@@ -69,39 +73,39 @@ while True:
 
     # Plotting in each subplot
     ax_accel_x.plot([0], accelData[0], 'bo-')
-    ax_accel_x.set_title('Accel Data X')
+    ax_accel_x.set_title('CorrectedGyroX')
     ax_accel_x.set_ylabel('Value')
 
     ax_accel_y.plot([1], accelData[1], 'go-')
-    ax_accel_y.set_title('Accel Data Y')
+    ax_accel_y.set_title('CorrectedGyroY')
     ax_accel_y.set_ylabel('Value')
 
     ax_accel_z.plot([2], accelData[2], 'ro-')
-    ax_accel_z.set_title('Accel Data Z')
+    ax_accel_z.set_title('CorrectedGyroZ')
     ax_accel_z.set_ylabel('Value')
 
     ax_gyro_x.plot([0], gyroData[0], 'bo-')
-    ax_gyro_x.set_title('Gyro Data X')
+    ax_gyro_x.set_title('CorrectedAccelX')
     ax_gyro_x.set_ylabel('Value')
 
     ax_gyro_y.plot([1], gyroData[1], 'go-')
-    ax_gyro_y.set_title('Gyro Data Y')
+    ax_gyro_y.set_title('CorrectedAccelY')
     ax_gyro_y.set_ylabel('Value')
 
     ax_gyro_z.plot([2], gyroData[2], 'ro-')
-    ax_gyro_z.set_title('Gyro Data Z')
+    ax_gyro_z.set_title('CorrectedAccelZ')
     ax_gyro_z.set_ylabel('Value')
 
     ax_mag_x.plot([0], magData[0], 'bo-')
-    ax_mag_x.set_title('Mag Data X')
+    ax_mag_x.set_title('CorrectedMagX')
     ax_mag_x.set_ylabel('Value')
 
     ax_mag_y.plot([1], magData[1], 'go-')
-    ax_mag_y.set_title('Mag Data Y')
+    ax_mag_y.set_title('CorrectedMagY')
     ax_mag_y.set_ylabel('Value')
 
     ax_mag_z.plot([2], magData[2], 'ro-')
-    ax_mag_z.set_title('Mag Data Z')
+    ax_mag_z.set_title('CorrectedMagZ')
     ax_mag_z.set_ylabel('Value')
 
     # Adjust layout and display
