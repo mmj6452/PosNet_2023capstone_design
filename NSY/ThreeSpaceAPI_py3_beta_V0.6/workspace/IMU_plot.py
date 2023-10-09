@@ -42,7 +42,7 @@ mag_z = []
 
 # Record data for 10 seconds with a 0.05-second interval
 start_time = time.time()
-duration = 20  # seconds
+duration = 10  # seconds
 interval = 0.005  # seconds
 end_time = time.time() + duration
 
