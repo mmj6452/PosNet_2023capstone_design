@@ -9,16 +9,20 @@ Data format: "%float(OrientPitch),%float(OrientYaw),%float(OrientRoll),
               %float(CorrectedGyroX),%float(CorrectedGyroY),%float(CorrectedGyroZ),
               %float(CorrectedAccelX),%float(CorrectedAccelY),%float(CorrectedAccelZ),
               %float(CorrectedMagX),%float(CorrectedMagY),%float(CorrectedMagZ)
+Asyncio를 이용하여 정확한 200hz의 데이터를 읽어오도록 하려고 하였지만 
+Asyncio의 특성상 최대 15미리 초만을 구현 가능함
+threading의 경우 함수가 스레드 안에서 동작하지 않는 문제 발생
 """
 
 from exampleComClasses import USB_ExampleClass
 from ThreeSpaceAPI import *
 import matplotlib.pyplot as plt
 import time
+import threading
 
 # Create communication object instance.
 com = USB_ExampleClass.UsbCom()
-
+print("com: ", com , type(com))
 # Create sensor instance. This will call the open function of the communication object.
 sensor = ThreeSpaceSensor(com)
 
@@ -37,12 +41,69 @@ mag_y = []
 mag_z = []
 
 # Record data for 10 seconds with a 0.05-second interval
-duration = 3  # seconds
-interval = 0.00285  # seconds
+start_time = time.time()
+duration = 20  # seconds
+interval = 0.005  # seconds
 end_time = time.time() + duration
 
-while time.time() < end_time:
-    # Get reading from sensor, returns as tuple.
+def plot():
+    # Create a 2x2 grid of subplots
+    fig, axs = plt.subplots(4, figsize=(15, 8))
+    fig.subplots_adjust(hspace=0.5, wspace=0.2)
+
+    acc_max = 12
+    gyro_max = 2.5
+    mag_max = 0.8
+
+
+    axs[0].set_xlabel('Sample')
+    axs[0].set_ylabel('Value')
+    axs[0].set_title('OrientPitch OrientYaw OrientRoll')
+    # Plot Gyro Y
+    axs[0].plot(OrientYaw,'g')  
+    # Plot Gyro Z
+    axs[0].plot(OrientRoll,'b')
+
+
+    # Plot Gyro X
+    axs[1].plot(acc_x,'r')
+    axs[1].set_ylim(-acc_max, acc_max)
+    axs[1].set_xlabel('Sample')
+    axs[1].set_ylabel('Value')
+    axs[1].set_title('CorrectedGyroX CorrectedGyroY CorrectedGyroZ')
+    # Plot Gyro Y
+    axs[1].plot(acc_y,'g')
+    # Plot Gyro Z
+    axs[1].plot(acc_z,'b')
+
+
+    # Plot Accel X
+    axs[2].plot(gyro_x,'r')
+    axs[2].set_ylim(-gyro_max, gyro_max)
+    axs[2].set_title('CorrectedAccelX CorrectedAccelY CorrectedAccelZ')
+    # Plot Accel Y
+    axs[2].plot(gyro_y,'g')
+    # Plot Accel Z
+    axs[2].plot(gyro_z,'b')
+
+
+
+    # Plot Mag X
+    axs[3].plot(mag_x,'r')
+    axs[3].set_ylim(-mag_max, mag_max)
+    axs[3].set_xlabel('Sample')
+    axs[3].set_ylabel('Value')
+    axs[3].set_title('CorrectedMagX CorrectedMagY CorrectedMagZ')
+    # Plot Mag Y
+    axs[3].plot(mag_y,'g')
+    # Plot Mag Z
+    axs[3].plot(mag_z,'b')
+
+
+    plt.tight_layout()
+    plt.show()
+
+def read_imu():
     reading = sensor.getAllRawComponentSensorData()
 
     # Save component values to lists
@@ -59,64 +120,18 @@ while time.time() < end_time:
     mag_y.append(reading[10])
     mag_z.append(reading[11])
 
-    time.sleep(interval)
 
+last_time = time.time()
+count = 0
+while time.time() < end_time:
+    if time.time() - last_time > interval * count:
+        print("loop: ", count)
+        read_imu()
+        count += 1
+
+print(len(acc_x))
 # Close the sensor
 sensor.cleanup()
-
-# Create a 2x2 grid of subplots
-fig, axs = plt.subplots(4, figsize=(15, 8))
-fig.subplots_adjust(hspace=0.5, wspace=0.2)
-
-acc_max = 12
-gyro_max = 2.5
-mag_max = 0.8
-
-
-axs[0].set_xlabel('Sample')
-axs[0].set_ylabel('Value')
-axs[0].set_title('OrientPitch OrientYaw OrientRoll')
-# Plot Gyro Y
-axs[0].plot(OrientYaw,'g')  
-# Plot Gyro Z
-axs[0].plot(OrientRoll,'b')
-
-
-# Plot Gyro X
-axs[1].plot(acc_x,'r')
-axs[1].set_ylim(-acc_max, acc_max)
-axs[1].set_xlabel('Sample')
-axs[1].set_ylabel('Value')
-axs[1].set_title('CorrectedGyroX CorrectedGyroY CorrectedGyroZ')
-# Plot Gyro Y
-axs[1].plot(acc_y,'g')
-# Plot Gyro Z
-axs[1].plot(acc_z,'b')
-
-
-# Plot Accel X
-axs[2].plot(gyro_x,'r')
-axs[2].set_ylim(-gyro_max, gyro_max)
-axs[2].set_title('CorrectedAccelX CorrectedAccelY CorrectedAccelZ')
-# Plot Accel Y
-axs[2].plot(gyro_y,'g')
-# Plot Accel Z
-axs[2].plot(gyro_z,'b')
-
-
-
-# Plot Mag X
-axs[3].plot(mag_x,'r')
-axs[3].set_ylim(-mag_max, mag_max)
-axs[3].set_xlabel('Sample')
-axs[3].set_ylabel('Value')
-axs[3].set_title('CorrectedMagX CorrectedMagY CorrectedMagZ')
-# Plot Mag Y
-axs[3].plot(mag_y,'g')
-# Plot Mag Z
-axs[3].plot(mag_z,'b')
-
-
-plt.tight_layout()
-plt.show()
-print(len(acc_x))
+ending_time = time.time()
+print("time: ", ending_time - start_time)
+plot()
