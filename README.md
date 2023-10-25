@@ -7,4 +7,4 @@
 IMU 센서 이용
 
 NSY/ThreeSpaceAPI_py3_beta_V0.6/workspace의 IMU 시리즈 이용하시면 됩니다.
-![2021_04_user_count](~@source/NSY/img/IMU_plot.PNG)
+![2021_04_user_count](NSY/img/IMU_plot.PNG)
