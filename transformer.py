@@ -153,7 +153,7 @@ class Transformer(nn.Module):
     def encode(self, src, src_mask):
         return self.encoder(src, src_mask)
 
-    def forward(self, src, tgt):
+    def forward(self, src):
         src_mask = self.make_src_mask(src)
         x = self.encode(src, src_mask)
         x = x.view(x.size(0), -1)
