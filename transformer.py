@@ -127,7 +127,7 @@ class Transformer(nn.Module):
         mask.requires_grad = False
         return mask
 
-    def make_subsequent_mask(self, query, idx): # **************************************************************************************data_len에 맞게 idx 수정해야함**************************************************************************************
+    def make_subsequent_mask(self, query): # **************************************************************************************data_len에 맞게 idx 수정해야함**************************************************************************************
         # query: (n_batch, query_seq_len)
         # key: (n_batch, key_seq_len)
         query_seq_len, key_seq_len = self.seq_len, self.seq_len
@@ -143,17 +143,18 @@ class Transformer(nn.Module):
         mask = torch.tensor(arr, dtype=torch.bool, requires_grad=False, device=query.device)
         return mask
 
-    def make_src_mask(self, src, idx):
+    def make_src_mask(self, src):
         pad_mask = self.make_pad_mask(src, src)
-        seq_mask = self.make_subsequent_mask(src, idx)
-        last_mask = pad_mask & seq_mask
+        '''seq_mask = self.make_subsequent_mask(src, src)'''
+        '''last_mask = pad_mask & seq_mask'''
+        last_mask = pad_mask
         return last_mask
 
     def encode(self, src, src_mask):
         return self.encoder(src, src_mask)
 
     def forward(self, src, tgt):
-        src_mask = self.make_src_mask(src, idx)
+        src_mask = self.make_src_mask(src)
         x = self.encode(src, src_mask)
         x = x.view(x.size(0), -1)
         out = self.generator(x)
