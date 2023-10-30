@@ -116,7 +116,7 @@ class Transformer(nn.Module):
         self.encoder = encoder
         self.generator = generator
 
-    def make_pad_mask(self, query, key, pad_idx=1):
+    '''def make_pad_mask(self, query, key, pad_idx=1):
         # query: (n_batch, query_seq_len)
         # key: (n_batch, key_seq_len)
         query_seq_len, key_seq_len = self.seq_len, self.seq_len
@@ -152,14 +152,13 @@ class Transformer(nn.Module):
         '''seq_mask = self.make_subsequent_mask(src, src)'''
         '''last_mask = pad_mask & seq_mask'''
         last_mask = pad_mask
-        return last_mask
+        return last_mask'''
 
-    def encode(self, src, src_mask):
+    def encode(self, src, src_mask=None):
         return self.encoder(src, src_mask)
 
     def forward(self, src):
-        src_mask = self.make_src_mask(src)
-        x = self.encode(src, src_mask)
+        x = self.encode(src)
         x = x.view(x.size(0), -1)
         out = self.generator(x)
         return out
