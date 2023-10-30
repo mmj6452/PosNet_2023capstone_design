@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+import numpy as np
+
 class PositionWiseFeedForwardLayer(nn.Module):
 
     def __init__(self, fc1, fc2):
