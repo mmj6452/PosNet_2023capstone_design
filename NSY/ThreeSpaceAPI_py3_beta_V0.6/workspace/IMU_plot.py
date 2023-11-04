@@ -17,8 +17,9 @@ threading의 경우 함수가 스레드 안에서 동작하지 않는 문제 발
 from exampleComClasses import USB_ExampleClass
 from ThreeSpaceAPI import *
 import matplotlib.pyplot as plt
+import pandas as pd
+import datetime
 import time
-import threading
 
 # Create communication object instance.
 com = USB_ExampleClass.UsbCom()
@@ -39,6 +40,7 @@ gyro_z = []
 mag_x = []
 mag_y = []
 mag_z = []
+Time = []
 
 # Record data for 10 seconds with a 0.05-second interval
 start_time = time.time()
@@ -107,6 +109,11 @@ def read_imu():
     reading = sensor.getAllRawComponentSensorData()
 
     # Save component values to lists
+    #티임함수 시간을 년도, 월, 일, 시간, 분, 초로 나누어서 String으로 저장
+    current_time  = time.time()
+    time_struct = time.gmtime(current_time)
+    #time_struct = time_struct.tm_hour, time_struct.tm_min, time_struct.tm_sec
+    Time.append(time_struct)
     OrientPitch.append(reading[0])
     OrientYaw.append(reading[1])
     OrientRoll.append(reading[2])
@@ -134,4 +141,24 @@ print(len(acc_x))
 sensor.cleanup()
 ending_time = time.time()
 print("time: ", ending_time - start_time)
+
+#t센서값을 CSV파일로 저장
+
+
+data = {'Time': Time,
+        'CorrectedGyroX': acc_x,
+        'CorrectedGyroY': acc_y,
+        'CorrectedGyroZ': acc_z,
+        'CorrectedAccelX': gyro_x,
+        'CorrectedAccelY': gyro_y,
+        'CorrectedAccelZ': gyro_z,
+        'CorrectedMagX': mag_x,
+        'CorrectedMagY': mag_y,
+        'CorrectedMagZ': mag_z}
+#데이터를 주소에 저장
+df = pd.DataFrame(data)
+df.to_csv('PosNet_2023capstone_design/NSY/ThreeSpaceAPI_py3_beta_V0.6/Data/IMU_data.csv', index=False)
+print("csv file saved")
+
+
 plot()
