@@ -35,15 +35,9 @@ interval = 0.005  # seconds
 
 #변수 셋팅
 ts = []
-acc_x = []
-acc_y = []
-acc_z = []
-gyro_x = []
-gyro_y = []
-gyro_z = []
-mag_x = []
-mag_y = []
-mag_z = []
+acc_x, acc_y, acc_z = [],[],[]
+gyro_x, gyro_y, gyro_z = [],[],[]
+mag_x, mag_y, mag_z = [],[],[]
 
 #IMU센서 초기화 및 객체 생성
 def init_3space():
@@ -86,39 +80,41 @@ def end_Dobot(api):
     dType.DisconnectDobot(api)
 
 #Dobot 움직이는 함수
-def move_Dobot(api, Home, distance, angle, angle_bias, Data , j , i):
+def move_Dobot(api, sensor, Home, distance, angle, angle_bias, Data , j , i):
     #+축으로 진행하는 과정
     lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, Home[0]+(i*distance), Home[1], Home[2], Home[3]+(j*angle)-angle_bias, isQueued=1)[0]
     dType.SetQueuedCmdStartExec(api)
     #두봇이 움직이는 동안 데이터 수집
+    last_time = time.time()
+    count = 0
     while lastIndex > dType.GetQueuedCmdCurrentIndex(api)[0]:
-        last_time = time.time()
-        count = 0
         if time.time() - last_time > interval * count:
-            reading = sensor.getAllRawComponentSensorData()
             count += 1
+            reading = sensor.getAllRawComponentSensorData()
             x, y, z, rHead, _, _, _, _ = dType.GetPose(api)
             Current_time = time.time()
             Data.append([Current_time , x, y, z, rHead , reading[3], reading[4], reading[5], reading[6], reading[7], reading[8], reading[9], reading[10], reading[11]])
-            print("loop: ", count , "Delay_Time: ", Current_time - last_time , "action cycle: ", count/(Current_time - last_time))
             dType.dSleep(1)
     dType.SetQueuedCmdStopExec(api)
+    end_time = time.time()
+    print("loop: ", count , "Delay_Time: ", end_time - last_time , "action cycle: ", count/(end_time - last_time))
     
     #-축으로 진행하는 과정
     lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, Home[0]+(i), Home[1], Home[2], Home[3]+(j*angle)-angle_bias, isQueued=1)[0]
     dType.SetQueuedCmdStartExec(api)
+    last_time = time.time()
+    count = 0
     while lastIndex > dType.GetQueuedCmdCurrentIndex(api)[0]:
-        last_time = time.time()
-        count = 0
         if time.time() - last_time > interval * count:
-            reading = sensor.getAllRawComponentSensorData()
             count += 1
+            reading = sensor.getAllRawComponentSensorData()
             x, y, z, rHead, _, _, _, _ = dType.GetPose(api)
             Current_time = time.time()
             Data.append([Current_time , x, y, z, rHead , reading[3], reading[4], reading[5], reading[6], reading[7], reading[8], reading[9], reading[10], reading[11]])
-            print("loop: ", count , "Delay_Time: ", Current_time - last_time , "action cycle: ", count/(Current_time - last_time))
             dType.dSleep(1)
     dType.SetQueuedCmdStopExec(api)
+    end_time = time.time()
+    print("loop: ", count , "Delay_Time: ", end_time - last_time , "action cycle: ", count/(end_time - last_time))
     return Data, lastIndex
 def plot(x,y,z,ts):
     plt.subplot(3,1,1)
@@ -157,14 +153,11 @@ def plot_3D(x,y,z):
 sensor =  init_3space()
 api, state = init_Dobot()
 
-
 if (state == dType.DobotConnect.DobotConnect_NoError):
-
-
 ################################################ 실질적인 동작 ##############################################################################
     for j in range(angle_divider+1):
         for i in range(Number_of_repetitions+1):
-            Data , lastIndex = move_Dobot(api, Home, distance, angle, angle_bias, Data , j , i)
+            Data , lastIndex = move_Dobot(api,sensor, Home, distance, angle, angle_bias, Data , j , i)
 
 dType.SetHOMECmd(api, temp = 0, isQueued = 1)
 dType.SetQueuedCmdStartExec(api)
@@ -174,11 +167,13 @@ dType.SetQueuedCmdStopExec(api)
 #Disconnect Dobot (연결 끊기)
 dType.DisconnectDobot(api)
 
+#슬라이싱 연산을 위해 numpy 배열로 변환
 Data = np.array(Data)
+
+ts= Data[:,0]
 x= Data[:,1]
 y= Data[:,2]
 z= Data[:,3]
-ts= Data[:,0]
 
 plot(x,y,z,ts)
 plot_3D(x,y,z)
