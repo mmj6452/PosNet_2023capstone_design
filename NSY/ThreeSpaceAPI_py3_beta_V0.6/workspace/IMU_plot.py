@@ -113,7 +113,7 @@ def read_imu():
     current_time  = time.time()
     time_struct = time.gmtime(current_time)
     #time_struct = time_struct.tm_hour, time_struct.tm_min, time_struct.tm_sec
-    Time.append(time_struct)
+    Time.append(current_time)
     OrientPitch.append(reading[0])
     OrientYaw.append(reading[1])
     OrientRoll.append(reading[2])
